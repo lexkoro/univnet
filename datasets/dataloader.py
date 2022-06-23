@@ -281,7 +281,7 @@ class MelFromDisk(Dataset):
 
         except (FileNotFoundError, RuntimeError, TypeError, AssertionError):
             # sr, wav = read_wav_np(wavpath)
-            wav = audio
+            wav = audio.squeeze(0).cpu().float().numpy()
             assert (
                 sr == self.hp.audio.sampling_rate
             ), "sample mismatch: expected %d, got %d at %s" % (
