@@ -10,6 +10,7 @@ from pathlib import Path
 from utils.utils import read_wav_np
 from utils.stft import TacotronSTFT
 from torchaudio import transforms
+from librosa.util import normalize
 
 MAX_WAV_VALUE = 32768.0
 SEQ_LENGTH = int(1.0 * 44100)
@@ -238,6 +239,8 @@ class MelFromDisk(Dataset):
     def my_getitem(self, idx):
         wavpath = self.meta[idx]
         sr, audio = read_wav_np(wavpath)
+
+        audio = normalize(audio) * 0.95
 
         if len(audio) < self.hp.audio.segment_length + self.hp.audio.pad_short:
             audio = np.pad(
