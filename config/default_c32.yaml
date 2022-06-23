@@ -20,12 +20,12 @@ audio:
   n_mel_channels: 100
   segment_length: 16384 # Should be multiple of 256
   pad_short: 2000
-  filter_length: 1024
+  filter_length: 2048
   hop_length: 256 # WARNING: this can't be changed.
-  win_length: 1024
-  sampling_rate: 24000
+  win_length: 2048
+  sampling_rate: 44100
   mel_fmin: 0.0
-  mel_fmax: 12000.0
+  mel_fmax: 10000.0
 #############################
 gen:
   noise_dim: 64
