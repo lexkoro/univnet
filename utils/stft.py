@@ -32,9 +32,18 @@ from librosa.filters import mel as librosa_mel_fn
 
 
 class TacotronSTFT(torch.nn.Module):
-    def __init__(self, filter_length=1024, hop_length=256, win_length=1024,
-                 n_mel_channels=80, sampling_rate=22050, mel_fmin=0.0,
-                 mel_fmax=None, center=False, device='cpu'):
+    def __init__(
+        self,
+        filter_length=1024,
+        hop_length=256,
+        win_length=1024,
+        n_mel_channels=80,
+        sampling_rate=22050,
+        mel_fmin=0.0,
+        mel_fmax=None,
+        center=False,
+        device="cpu",
+    ):
         super(TacotronSTFT, self).__init__()
         self.n_mel_channels = n_mel_channels
         self.sampling_rate = sampling_rate
@@ -46,24 +55,39 @@ class TacotronSTFT(torch.nn.Module):
         self.center = center
 
         mel = librosa_mel_fn(
-            sampling_rate, filter_length, n_mel_channels, mel_fmin, mel_fmax)
+            sampling_rate, filter_length, n_mel_channels, mel_fmin, mel_fmax
+        )
 
         mel_basis = torch.from_numpy(mel).float().to(device)
         hann_window = torch.hann_window(win_length).to(device)
 
-        self.register_buffer('mel_basis', mel_basis)
-        self.register_buffer('hann_window', hann_window)
+        self.register_buffer("mel_basis", mel_basis)
+        self.register_buffer("hann_window", hann_window)
 
     def linear_spectrogram(self, y):
-        assert (torch.min(y.data) >= -1)
-        assert (torch.max(y.data) <= 1)
+        # assert torch.min(y.data) >= -1
+        # assert torch.max(y.data) <= 1
 
-        y = torch.nn.functional.pad(y.unsqueeze(1),
-                                    (int((self.n_fft - self.hop_size) / 2), int((self.n_fft - self.hop_size) / 2)),
-                                    mode='reflect')
+        y = torch.nn.functional.pad(
+            y.unsqueeze(1),
+            (
+                int((self.n_fft - self.hop_size) / 2),
+                int((self.n_fft - self.hop_size) / 2),
+            ),
+            mode="reflect",
+        )
         y = y.squeeze(1)
-        spec = torch.stft(y, self.n_fft, hop_length=self.hop_size, win_length=self.win_size, window=self.hann_window,
-                          center=self.center, pad_mode='reflect', normalized=False, onesided=True)
+        spec = torch.stft(
+            y,
+            self.n_fft,
+            hop_length=self.hop_size,
+            win_length=self.win_size,
+            window=self.hann_window,
+            center=self.center,
+            pad_mode="reflect",
+            normalized=False,
+            onesided=True,
+        )
         spec = torch.norm(spec, p=2, dim=-1)
 
         return spec
@@ -78,16 +102,30 @@ class TacotronSTFT(torch.nn.Module):
         -------
         mel_output: torch.FloatTensor of shape (B, n_mel_channels, T)
         """
-        assert(torch.min(y.data) >= -1)
-        assert(torch.max(y.data) <= 1)
+        # assert(torch.min(y.data) >= -1)
+        # assert(torch.max(y.data) <= 1)
 
-        y = torch.nn.functional.pad(y.unsqueeze(1),
-                                    (int((self.n_fft - self.hop_size) / 2), int((self.n_fft - self.hop_size) / 2)),
-                                    mode='reflect')
+        y = torch.nn.functional.pad(
+            y.unsqueeze(1),
+            (
+                int((self.n_fft - self.hop_size) / 2),
+                int((self.n_fft - self.hop_size) / 2),
+            ),
+            mode="reflect",
+        )
         y = y.squeeze(1)
 
-        spec = torch.stft(y, self.n_fft, hop_length=self.hop_size, win_length=self.win_size, window=self.hann_window,
-                          center=self.center, pad_mode='reflect', normalized=False, onesided=True)
+        spec = torch.stft(
+            y,
+            self.n_fft,
+            hop_length=self.hop_size,
+            win_length=self.win_size,
+            window=self.hann_window,
+            center=self.center,
+            pad_mode="reflect",
+            normalized=False,
+            onesided=True,
+        )
 
         spec = torch.sqrt(spec.pow(2).sum(-1) + (1e-9))
 

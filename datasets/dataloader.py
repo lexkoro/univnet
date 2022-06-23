@@ -22,7 +22,6 @@ RIR_PATH = "/home/alexander/Projekte/smallroom22050"
 #     recursive=True,
 # )
 
-
 MAX_WAV_VALUE = 32768.0
 
 
