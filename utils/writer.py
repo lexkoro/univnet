@@ -1,8 +1,9 @@
-from torch.utils.tensorboard import SummaryWriter
-import numpy as np
 import librosa
+import numpy as np
+from torch.utils.tensorboard import SummaryWriter
 
-from .plotting import plot_waveform_to_numpy, plot_spectrogram_to_numpy
+from .plotting import plot_spectrogram_to_numpy, plot_waveform_to_numpy
+
 
 class MyWriter(SummaryWriter):
     def __init__(self, hp, logdir):

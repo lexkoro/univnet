@@ -1,16 +1,17 @@
+import glob
 import os
-import glob
-import torch
 import random
-import numpy as np
-from torch.utils.data import DistributedSampler, DataLoader, Dataset
 from collections import Counter
-import glob
 from pathlib import Path
-from utils.utils import read_wav_np
-from utils.stft import TacotronSTFT
-from torchaudio import transforms
+
+import numpy as np
+import torch
 from librosa.util import normalize
+from torch.utils.data import DataLoader, Dataset, DistributedSampler
+from torchaudio import transforms
+
+from utils.stft import TacotronSTFT
+from utils.utils import read_wav_np
 
 MAX_WAV_VALUE = 32768.0
 SEQ_LENGTH = int(1.0 * 44100)

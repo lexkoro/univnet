@@ -1,22 +1,24 @@
-import os
-import time
+import itertools
 import logging
 import math
-import tqdm
+import os
+import time
+import traceback
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import tqdm
 from torch.distributed import init_process_group
 from torch.nn.parallel import DistributedDataParallel
-import itertools
-import traceback
 
 from datasets.dataloader import create_dataloader
-from utils.writer import MyWriter
+from model.discriminator import Discriminator
+from model.generator import Generator
 from utils.stft import TacotronSTFT
 from utils.stft_loss import MultiResolutionSTFTLoss
-from model.generator import Generator
-from model.discriminator import Discriminator
+from utils.writer import MyWriter
+
 from .utils import get_commit_hash
 from .validation import validate
 

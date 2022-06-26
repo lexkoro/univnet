@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class KernelPredictor(torch.nn.Module):
     ''' Kernel predictor for the location-variable convolutions'''
     def __init__(

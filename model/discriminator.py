@@ -1,9 +1,10 @@
 import torch
 import torch.nn as nn
+from omegaconf import OmegaConf
 
 from .mpd import MultiPeriodDiscriminator
 from .mrd import MultiResolutionDiscriminator
-from omegaconf import OmegaConf
+
 
 class Discriminator(nn.Module):
     def __init__(self, hp):

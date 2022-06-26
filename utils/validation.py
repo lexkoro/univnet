@@ -1,6 +1,6 @@
-import tqdm
 import torch
 import torch.nn.functional as F
+import tqdm
 
 
 def validate(hp, args, generator, discriminator, valloader, stft, writer, step, device):
