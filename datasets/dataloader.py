@@ -9,6 +9,7 @@ import torch
 from librosa.util import normalize
 from torch.utils.data import DataLoader, Dataset, DistributedSampler
 from torchaudio import transforms
+import math
 
 from utils.stft import TacotronSTFT
 from utils.utils import read_wav_np
@@ -254,6 +255,16 @@ class MelFromDisk(Dataset):
             )
 
         audio = torch.from_numpy(audio).unsqueeze(0)
+
+
+        if random.random() < 0.1:
+            # apply distortion to random samples with a 10% chance
+            noise = torch.rand(size=(audio.shape[0],)) - 0.5  # get 0 centered noise
+            speech_power = audio.norm(p=2)
+            noise_power = noise.norm(p=2)
+            scale = math.sqrt(math.e) * noise_power / speech_power  # signal to noise ratio of 5db
+            audio = (scale * audio + noise) / 2
+
         downsampled = self.downsample(audio)
         audio = self.upsample(downsampled)
 
@@ -272,45 +283,45 @@ class MelFromDisk(Dataset):
         return mel, audio
 
     def get_mel(self, wavpath, audio, sr):
-        melpath = wavpath.replace(".wav", ".mel")
-        try:
-            mel = torch.load(melpath, map_location="cpu")
-            assert (
-                mel.size(0) == self.hp.audio.n_mel_channels
-            ), "Mel dimension mismatch: expected %d, got %d" % (
-                self.hp.audio.n_mel_channels,
-                mel.size(0),
-            )
+        # melpath = wavpath.replace(".wav", ".mel")
+        # try:
+        #     mel = torch.load(melpath, map_location="cpu")
+        #     assert (
+        #         mel.size(0) == self.hp.audio.n_mel_channels
+        #     ), "Mel dimension mismatch: expected %d, got %d" % (
+        #         self.hp.audio.n_mel_channels,
+        #         mel.size(0),
+        #     )
 
-        except (FileNotFoundError, RuntimeError, TypeError, AssertionError):
+        # except (FileNotFoundError, RuntimeError, TypeError, AssertionError):
             # sr, wav = read_wav_np(wavpath)
-            wav = audio.squeeze(0).cpu().float().numpy()
-            assert (
-                sr == self.hp.audio.sampling_rate
-            ), "sample mismatch: expected %d, got %d at %s" % (
-                self.hp.audio.sampling_rate,
-                sr,
-                wavpath,
+        wav = audio.squeeze(0).cpu().float().numpy()
+        assert (
+            sr == self.hp.audio.sampling_rate
+        ), "sample mismatch: expected %d, got %d at %s" % (
+            self.hp.audio.sampl        # torch.save(mel, melpath)ing_rate,
+            sr,
+            wavpath,
+        )
+
+        if len(wav) < self.hp.audio.segment_length + self.hp.audio.pad_short:
+            wav = np.pad(
+                wav,
+                (
+                    0,
+                    self.hp.audio.segment_length
+                    + self.hp.audio.pad_short
+                    - len(wav),
+                ),
+                mode="constant",
+                constant_values=0.0,
             )
 
-            if len(wav) < self.hp.audio.segment_length + self.hp.audio.pad_short:
-                wav = np.pad(
-                    wav,
-                    (
-                        0,
-                        self.hp.audio.segment_length
-                        + self.hp.audio.pad_short
-                        - len(wav),
-                    ),
-                    mode="constant",
-                    constant_values=0.0,
-                )
+        wav = torch.from_numpy(wav).unsqueeze(0)
+        mel = self.stft.mel_spectrogram(wav)
 
-            wav = torch.from_numpy(wav).unsqueeze(0)
-            mel = self.stft.mel_spectrogram(wav)
+        mel = mel.squeeze(0)
 
-            mel = mel.squeeze(0)
-
-            torch.save(mel, melpath)
+    
 
         return mel
