@@ -299,7 +299,7 @@ class MelFromDisk(Dataset):
         assert (
             sr == self.hp.audio.sampling_rate
         ), "sample mismatch: expected %d, got %d at %s" % (
-            self.hp.audio.sampl        # torch.save(mel, melpath)ing_rate,
+            self.hp.audio.sampling_rate,
             sr,
             wavpath,
         )
